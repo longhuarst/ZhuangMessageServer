@@ -8,6 +8,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
 
 public class Message {
 
@@ -35,6 +37,10 @@ public class Message {
 					@Override
 					protected void initChannel(SocketChannel channel) throws Exception {
 						// TODO Auto-generated method stub
+						
+						//在原来的之前新增了两个解码器LineBasedFrameDecoder、StringDecoder
+						channel.pipeline().addLast(new LineBasedFrameDecoder(1024));
+						channel.pipeline().addLast(new StringDecoder());
 						channel.pipeline().addLast(new MessageHandler());
 					}
 				})
@@ -60,6 +66,8 @@ public class Message {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+
 
 		int port = 20000;
 		
