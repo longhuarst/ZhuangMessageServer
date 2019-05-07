@@ -80,13 +80,21 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 			//发布消息
 			Set<ChannelHandlerContext> sender = Hub.getInstance().get(topic);
 			
+			
+			
+			
 			if (sender == null) {
 				return;
 			}
 			
-			ByteBuf respone = Unpooled.copiedBuffer(message.getBytes());
+			System.out.println("sender.length()= "+sender.size());
+			
+			
+			
 			
 			for (ChannelHandlerContext client : sender){
+				ByteBuf respone = Unpooled.copiedBuffer(message.getBytes());
+				
 				client.writeAndFlush(respone);
 			}
 			
