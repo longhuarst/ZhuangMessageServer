@@ -2,10 +2,13 @@ package message;
 
 import java.util.Set;
 
+import com.sun.org.apache.bcel.internal.generic.I2F;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.IdleStateEvent;
 
 public class MessageHandler extends ChannelInboundHandlerAdapter {
 
@@ -161,5 +164,47 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
 		System.out.println("channelWritabilityChanged");
 	}
+
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+		// TODO Auto-generated method stub
+		//super.userEventTriggered(ctx, evt);
+		
+		
+		if (evt instanceof IdleStateEvent) {
+			IdleStateEvent event = (IdleStateEvent) evt;
+			switch (event.state()) {
+			case READER_IDLE:
+				//读超时
+				System.out.println("["+ctx.channel().remoteAddress()+"] Read Timeout !");
+				
+				ctx.close();//关闭连接
+				
+				break;
+				
+			case WRITER_IDLE:
+				//写超时
+				System.out.println("["+ctx.channel().remoteAddress()+"] Write Timeout !");
+				
+				break;
+				
+			case ALL_IDLE:
+				System.out.println("["+ctx.channel().remoteAddress()+"] All Timeout !");
+				
+				//全部超时
+				break;
+			default:
+				break;
+			}
+			
+		}
+	
+	}
+	
+	
+	
+	
+	
+	
 
 }
