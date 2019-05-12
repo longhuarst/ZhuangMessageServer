@@ -96,6 +96,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 			
 			
 			for (ChannelHandlerContext client : sender){
+				message = message + "\r\n";
 				ByteBuf respone = Unpooled.copiedBuffer(message.getBytes());
 				
 				client.writeAndFlush(respone);
@@ -125,7 +126,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 			
 			ByteBuf respone = Unpooled.copiedBuffer(lst.getBytes());
 			
-			ctx.writeAndFlush(respone);
+			ctx.channel().writeAndFlush(respone);
 		}else{
 			return;
 		}
