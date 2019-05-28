@@ -4,6 +4,8 @@ import java.util.Set;
 
 import com.sun.org.apache.bcel.internal.generic.I2F;
 
+import Sumaguan.Sumaguan;
+import WaterGetter.WaterGetter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -54,17 +56,37 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 		System.out.println(ctx.channel().remoteAddress().toString());
 		System.out.println("msg=[" + body + "]");
 		
-		if (body.startsWith("pub/")) {
-			body = body.substring("pub/".length());
+		if (body.startsWith("pub/") || body.startsWith("pubsv/")) {
+			boolean saving_flag = false;
+			if (body.startsWith("pubsv/")) {
+				body = body.substring("pubsv/".length());
+				saving_flag = true;//数据入库
+			}else {
+				body = body.substring("pub/".length());
+			}
 			
+			
+			String type = "";
+			//如果是保存的，则取出类型，并且去除类型
+			if (saving_flag) {
+				//去除指令
+				int index_type = body.indexOf('/');
+				if (index_type == -1) //无法检测
+					return;
+				type = body.substring(0, index_type);
+				body = body.substring(index_type + 1);
+			}
+			
+			
+			
+			//去除指令
 			int index = body.indexOf('/');
-			
 			if (index == -1) //无法检测
 				return;
-
 			String topic = body.substring(0, index);
-
 			String message = body.substring(index + 1);
+			
+			
 			
 			if (message.endsWith("\r\n")) {
 				message = message.substring(0,message.length()-1);
@@ -96,10 +118,26 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 			
 			
 			for (ChannelHandlerContext client : sender){
-				message = message + "\r\n";
-				ByteBuf respone = Unpooled.copiedBuffer(message.getBytes());
+				String message_sender = message + "\r\n";
+				ByteBuf respone = Unpooled.copiedBuffer(message_sender.getBytes());
 				
 				client.writeAndFlush(respone);
+			}
+			
+			//数据入库处理
+			if (saving_flag) {
+				switch(type) {
+				case "Sumaguan":
+					System.out.println("sumaguan saving...");
+					Sumaguan.saving(topic,message);
+					break;
+				case "WaterGetter":
+					System.out.println("watergetter saving...");
+					WaterGetter.saving(topic,message);
+					break;
+				default:
+					break;
+				}
 			}
 			
 		}else if (body.startsWith("sub/")){
